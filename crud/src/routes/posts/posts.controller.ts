@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common'
-import { PostsService } from 'src/posts/posts.service'
+import { PostsService } from 'src/routes/posts/posts.service'
 
 @Controller('posts')
 export class PostsController {
