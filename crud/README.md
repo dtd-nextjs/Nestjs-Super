@@ -1,99 +1,135 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Dự án CRUD
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Mô tả
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+**Người dùng** đăng ký, đăng nhập tài khoản và đăng các bài **post**
 
-## Description
+Ở đây mình sẽ dùng cơ sở dữ liệu quan hệ (SQL) để lưu trữ dữ liệu.
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Cụ thể là
 
-## Project setup
+- DB: SQLite
+- Schema drawing tool: [dbdiagram.io](https://dbdiagram.io) (Sử dụng DBML - Database Markup Language)
+- ORM: Prisma
 
-```bash
-$ npm install
+> Cho ai chưa biết thì ORM là gì: ORM (Object-Relational Mapping) là thư viện giúp tương tác với database thông qua ngôn ngữ lập trình (ví dụ như JavaScript) mà không cần viết truy vấn SQL.
+
+Ví dụ:
+
+```javascript
+const createMany = await prisma.user.createMany({
+  data: [
+    { name: 'Bob', email: 'bob@prisma.io' },
+    { name: 'Bobo', email: 'bob@prisma.io' }, // Duplicate unique key!
+    { name: 'Yewande', email: 'yewande@prisma.io' },
+    { name: 'Angelique', email: 'angelique@prisma.io' },
+  ],
+  skipDuplicates: true, // Skip 'Bobo'
+})
 ```
 
-## Compile and run the project
+Thay vì
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+```sql
+INSERT INTO user (name, email)
+VALUES
+  ('Bob', 'bob@prisma.io'),
+  ('Bobo', 'bob@prisma.io'),
+  ('Yewande', 'yewande@prisma.io'),
+  ('Angelique', 'angelique@prisma.io')
+ON CONFLICT (email) DO NOTHING;
 ```
 
-## Run tests
+## Giải thích lý do chọn stack trên
 
-```bash
-# unit tests
-$ npm run test
+- Chọn SQL vì doanh nghiệp ngoài kia dùng SQL rất nhiều (hơn hẳn NoSQL)
 
-# e2e tests
-$ npm run test:e2e
+- SQLite vì các bạn không cần cài đặt phần mềm gì cả, chỉ cần cài package npm là có ngay database. SQLite cũng được tích hợp sẵn trong Prisma. Tất nhiên bạn cũng có thể tự download cài đặt SQLite trên máy tính để tương tác với database một cách trực tiếp nếu muốn.
 
-# test coverage
-$ npm run test:cov
+- dbdiagram.io vì nó miễn phí, hỗ trợ DBML nên có thể dùng ChatGPT để tạo schema dễ dàng
+
+- Prisma: Best Node.js ORM
+
+## Phân tích cơ sở dữ liệu
+
+Thường với mình sẽ có 3 bước:
+
+- Phân tích chức năng
+- Vẽ schema bằng DBML
+- Tạo schema trong Prisma
+
+### Phân tích chức năng
+
+- Người dùng đăng ký tài khoản: email, name, password, confirm password
+- Người dùng đăng nhập: email, password
+- Người dùng đăng bài post: title, content
+- Áp dụng JWT cho việc xác thực người dùng, tích hợp Access Token và Refresh Token: Access Token sẽ là stateless, Refresh Token sẽ lưu trên database (stateful)
+- Một người dùng có thể có nhiều post
+- Một người dùng có thể đăng nhập trên nhiều thiết bị => Có nhiều Refresh Token cho mỗi người dùng
+
+Từ yêu cầu trên chúng ta sẽ có 3 bảng: User, Post, RefreshToken
+
+> Quy tắc đặt tên bảng: Mình sẽ đặt tên bảng và trường theo [quy tắc Prisma](https://www.prisma.io/docs/orm/reference/prisma-schema-reference#naming-conventions)
+
+### Vẽ schema bằng DBML
+
+Tham khảo tài liệu [DBML](https://dbml.dbdiagram.io/home) để biết cách viết schema
+
+Datatype khi code bằng DBML rất linh động, các bạn có thể gõ bất kỳ text nào mà bạn muốn. Vì vậy mình thường dùng datatype theo Prisma để dễ hiểu hơn (thay vì dùng datatype của sqlite).
+
+> Prisma sẽ tự động chuyển đổi datatype mà bạn khai báo trong schema thành datatype của database mà bạn đang dùng theo [quy tắc họ đề ra](https://www.prisma.io/docs/orm/reference/prisma-schema-reference#model-field-scalar-types)
+
+> Để hiểu sâu hơn về các kiểu dữ liệu của SQLite thì các bạn có thể lên google gõ "sqlite data types" hoặc vào chatgpt gõ "các kiểu dữ liệu trong sqlite". Trong video này tránh việc làm phức tạp quá, mình chỉ thao tác qua Prisma thôi.
+
+Quan hệ giữa các bảng:
+
+- Một người dùng có thể có nhiều post: Mối quan hệ 1-n
+- Một người dùng có thể có nhiều Refresh Token: Mối quan hệ 1-n
+
+Mỗi bảng **phải có** ít nhất 1 trường unique để phân biệt giữa các item với nhau.
+
+```dbml
+Project CRUD {
+  database_type: 'SQLite'
+  Note: 'Sử dụng Prisma ORM. Columne Type cũng theo Prisma'
+}
+
+Table User {
+  id        Int      [pk, increment]
+  email     String   [unique]
+  name      String
+  password  String
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime [note: '@updatedAt']
+}
+
+Table Post {
+  id        Int      [pk, increment]
+  title     String
+  content   String
+  authorId  Int
+  createdAt DateTime [default: `now()`]
+  updatedAt DateTime [note: '@updatedAt']
+}
+
+Ref: Post.authorId > User.id [delete: cascade, update: no action]  // Khi xóa người dùng thì xóa hết post của người đó
+
+Table RefreshToken {
+  token     String   [unique] // Có thể pk cũng được, nhưng mình không cần liên kết khóa ngoại nên thôi
+  userId    Int
+  expiresAt DateTime
+  createdAt DateTime [default: `now()`]
+}
+
+Ref: RefreshToken.userId > User.id  [delete: cascade, update: no action] // Khi xóa người dùng thì xóa hết token của người đó
 ```
 
-## Deployment
+> FAQ: Trường khóa chính khác gì với trường unique trong sql? PK thì đem đi tạo quan hệ được, còn unique thì không.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Tạo schema trong Prisma
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Khuyến khích dành ra 1 ngày để đọc doc của Prisma để biết cách nó vận hành, cách code.
 
-```bash
-$ npm install -g mau
-$ mau deploy
-```
+Trong tương lai mình sẽ làm 1 video Prisma Tutorial trên kênh youtube Được Dev.
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Cài đặt Prisma Extension cho VSCode để tạo schema dễ dàng hơn
