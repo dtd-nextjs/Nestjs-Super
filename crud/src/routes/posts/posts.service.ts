@@ -9,8 +9,7 @@ export class PostsService {
   getPosts() {
     return this.prismaService.post.findMany()
   }
-  createPost(body: any) {
-    const userId = 1
+  createPost(userId: number, body: any) {
     return this.prismaService.post.create({
       data: {
         title: body.title,
