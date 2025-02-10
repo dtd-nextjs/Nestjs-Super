@@ -3,7 +3,7 @@ import { PostsService } from 'src/routes/posts/posts.service'
 import { AuthType, ConditionGuard } from 'src/shared/constants/auth.constant'
 import { Auth } from 'src/shared/decorators/auth.decorator'
 import { ActiveUser } from 'src/shared/decorators/active-user.decorator'
-import { GetPostItemDTO } from 'src/routes/posts/post.dto'
+import { CreatePostBodyDTO, GetPostItemDTO } from 'src/routes/posts/post.dto'
 
 @Controller('posts')
 export class PostsController {
@@ -16,22 +16,33 @@ export class PostsController {
 
   @Post()
   @Auth([AuthType.Bearer])
-  createPost(@Body() body: any, @ActiveUser('userId') userId: number) {
-    return this.postsService.createPost(userId, body)
+  async createPost(@Body() body: CreatePostBodyDTO, @ActiveUser('userId') userId: number) {
+    return new GetPostItemDTO(await this.postsService.createPost(userId, body))
   }
 
   @Get(':id')
-  getPost(@Param('id') id: string) {
-    return this.postsService.getPost(id)
+  async getPost(@Param('id') id: string) {
+    return new GetPostItemDTO(await this.postsService.getPost(Number(id)))
   }
 
   @Put(':id')
-  updatePost(@Body() body: any, @Param('id') id: string) {
-    return this.postsService.updatePost(id, body)
+  @Auth([AuthType.Bearer])
+  async updatePost(@Body() body: CreatePostBodyDTO, @Param('id') id: string, @ActiveUser('userId') userId: number) {
+    return new GetPostItemDTO(
+      await this.postsService.updatePost({
+        postId: Number(id),
+        userId,
+        body,
+      }),
+    )
   }
 
   @Delete(':id')
-  deletePost(@Param('id') id: string) {
-    return this.postsService.deletePost(id)
+  @Auth([AuthType.Bearer])
+  deletePost(@Param('id') id: string, @ActiveUser('userId') userId: number): Promise<boolean> {
+    return this.postsService.deletePost({
+      postId: Number(id),
+      userId,
+    })
   }
 }
