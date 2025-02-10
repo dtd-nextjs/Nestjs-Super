@@ -6,8 +6,19 @@ import { PrismaService } from 'src/shared/services/prisma.service'
 @Injectable()
 export class PostsService {
   constructor(private readonly prismaService: PrismaService) {}
-  getPosts() {
-    return this.prismaService.post.findMany()
+  getPosts(userId: number) {
+    return this.prismaService.post.findMany({
+      where: {
+        authorId: userId,
+      },
+      include: {
+        author: {
+          omit: {
+            password: true,
+          },
+        },
+      },
+    })
   }
   createPost(userId: number, body: any) {
     return this.prismaService.post.create({
