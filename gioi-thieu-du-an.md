@@ -79,3 +79,11 @@ Hỗ trợ thông tin thanh toán chuyển khoản
 Chức năng nhắn tin
 
 - **Message**: id, fromUserId, toUserId, content, isReadAt
+
+FAQ:
+
+1. Tại sao cần tạo bảng **VerificationCode** mà không gọp vào bảng **User**?
+
+Liên quan đến flow đăng ký tài khoản
+
+Mình muốn verify email trước khi người dùng nhấn submit đăng ký tài khoản, điều này giúp tránh được email rác cũng như là xung đột email giữa các user
