@@ -1,10 +1,14 @@
 import { ConflictException, Injectable } from '@nestjs/common'
-import { RegisterBodyType } from 'src/routes/auth/auth.model'
+import { addMilliseconds } from 'date-fns'
+import { RegisterBodyType, SendOTPBodyType } from 'src/routes/auth/auth.model'
 import { AuthRepository } from 'src/routes/auth/auth.repo'
 import { RolesService } from 'src/routes/auth/roles.service'
-import { isUniqueConstraintPrismaError } from 'src/shared/helpers'
+import envConfig from 'src/shared/config'
+import { generateOTP, isUniqueConstraintPrismaError } from 'src/shared/helpers'
 import { HashingService } from 'src/shared/services/hashing.service'
 import { TokenService } from 'src/shared/services/token.service'
+import ms from 'ms'
+import { SharedUserRepository } from 'src/shared/repositories/shared-user.repo'
 
 @Injectable()
 export class AuthService {
@@ -12,6 +16,7 @@ export class AuthService {
     private readonly hashingService: HashingService,
     private readonly rolesService: RolesService,
     private readonly authRepository: AuthRepository,
+    private readonly sharedUserRepository: SharedUserRepository,
   ) {}
   async register(body: RegisterBodyType) {
     try {
@@ -30,6 +35,21 @@ export class AuthService {
       }
       throw error
     }
+  }
+
+  async sendOTP(body: SendOTPBodyType) {
+    const user = await this.sharedUserRepository.findUnique({ email: body.email })
+    if (user) {
+      throw new ConflictException('Email đã tồn tại')
+    }
+    const code = generateOTP()
+    const verificationCode = await this.authRepository.createVerificationCode({
+      email: body.email,
+      code,
+      type: body.type,
+      expiresAt: addMilliseconds(new Date(), ms(envConfig.OTP_EXPIRES_IN)),
+    })
+    return verificationCode
   }
 
   // async login(body: any) {
