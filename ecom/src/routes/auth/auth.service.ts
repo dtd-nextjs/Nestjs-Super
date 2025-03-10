@@ -24,6 +24,8 @@ import {
   FailedToSendOTPException,
   InvalidOTPException,
   InvalidPasswordException,
+  InvalidTOTPAndCodeException,
+  InvalidTOTPException,
   OTPExpiredException,
   RefreshTokenAlreadyUsedException,
   TOTPAlreadyEnabledException,
@@ -131,6 +133,7 @@ export class AuthService {
   }
 
   async login(body: LoginBodyType & { userAgent: string; ip: string }) {
+    // 1. Lấy thông tin user, kiểm tra user có tồn tại hay không, mật khẩu có đúng không
     const user = await this.authRepository.findUniqueUserIncludeRole({
       email: body.email,
     })
@@ -143,11 +146,41 @@ export class AuthService {
     if (!isPasswordMatch) {
       throw InvalidPasswordException
     }
+    // 2. Nếu user đã bật mã 2FA thì kiểm tra mã 2FA TOTP Code hoặc OTP Code (email)
+    if (user.totpSecret) {
+      // Nếu không có mã TOTP Code và Code thì thông báo cho client biết
+      if (!body.totpCode && !body.code) {
+        throw InvalidTOTPAndCodeException
+      }
+
+      // Kiểm tra TOTP Code có hợp lệ hay không
+      if (body.totpCode) {
+        const isValid = this.twoFactorService.verifyTOTP({
+          email: user.email,
+          secret: user.totpSecret,
+          token: body.totpCode,
+        })
+        if (!isValid) {
+          throw InvalidTOTPException
+        }
+      } else if (body.code) {
+        // Kiểm tra mã OTP có hợp lệ không
+        await this.validateVerificationCode({
+          email: user.email,
+          code: body.code,
+          type: TypeOfVerificationCode.LOGIN,
+        })
+      }
+    }
+
+    // 3. Tạo mới device
     const device = await this.authRepository.createDevice({
       userId: user.id,
       userAgent: body.userAgent,
       ip: body.ip,
     })
+
+    // 4. Tạo mới accessToken và refreshToken
     const tokens = await this.generateTokens({
       userId: user.id,
       deviceId: device.id,

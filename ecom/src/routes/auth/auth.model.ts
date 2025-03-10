@@ -56,6 +56,22 @@ export const LoginBodySchema = UserSchema.pick({
     code: z.string().length(6).optional(), // Email OTP code
   })
   .strict()
+  .superRefine(({ totpCode, code }, ctx) => {
+    // Nếu mà truyền cùng lúc totpCode và code thì sẽ add issue
+    const message = 'Bạn chỉ nên truyền mã xác thực 2FA hoặc mã OTP. Không được truyền cả 2'
+    if (totpCode !== undefined && code !== undefined) {
+      ctx.addIssue({
+        path: ['totpCode'],
+        message,
+        code: 'custom',
+      })
+      ctx.addIssue({
+        path: ['code'],
+        message,
+        code: 'custom',
+      })
+    }
+  })
 
 export const LoginResSchema = z.object({
   accessToken: z.string(),
