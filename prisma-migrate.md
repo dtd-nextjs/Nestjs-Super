@@ -74,7 +74,7 @@ Nếu bạn đã có sẵn file `schema.prisma` do đang sử dụng cách `pris
 
 Ví dụ mình muốn thêm Partial Unique Indexes vào một table trên Postgresql. Prisma Schema không hỗ trợ tính năng này, nhưng chúng ta có thể thêm bằng cách sửa file migration.
 
-1. Tạo một file migration `npx prisma migrate dev --create-only`. Câu lệnh này yêu cầu Prisma kiểm tra file `schema.prisma` với trạng thái database để tạo ra file migration mới. `--create-only` Tùy chọn này giới hạn hành động của lệnh chỉ ở bước tạo file migration, mà không thực hiện bước áp dụng (apply) migration vào cơ sở dữ liệu. Ở bước này thì nó sẽ tạo ra file sql rỗng
+1. Tạo một file migration `npx prisma migrate dev --create-only`. Câu lệnh này yêu cầu Prisma kiểm tra **lịch sử các file migration**, **schema.prisma** với **trạng thái database** để tạo ra file migration mới. `--create-only` Tùy chọn này giới hạn hành động của lệnh chỉ ở bước tạo file migration, mà không thực hiện bước áp dụng (apply) migration vào cơ sở dữ liệu. Ở bước này thì nó sẽ tạo ra file sql rỗng
 
 2. Paste nội dung sau vào file migration mới tạo
 
@@ -91,3 +91,28 @@ Ví dụ mình muốn thêm Partial Unique Indexes vào một table trên Postgr
 Trong nhiều trường hợp khi thay đổi schema, nếu thực hiện migrate sẽ bị mất data. Để xử lý trường hợp này, chúng ta cần phải edit lại file migration
 
 Tham khảo: [Customizing migrations](https://www.prisma.io/docs/orm/prisma-migrate/workflows/customizing-migrations)
+
+### Workflow migration đúng
+
+- Chạy `npx prisma migrate dev --create-only` để tạo file migration mới
+- Sửa file migration mới tạo
+- Chạy `npx prisma migrate dev` để áp dụng migration
+
+Trong trường hợp bạn không sửa hoặc sửa sai, dẫn đến migration failed thì xem tiếp phần dưới
+
+### Xử lý khi migration failed
+
+- Đánh dấu rollback migration
+
+  ```bash
+  npx prisma migrate resolve --rolled-back <migration-name>
+  ```
+
+- Sửa file migration
+- Redeploy migration
+
+  ```bash
+  npx prisma migrate deploy
+  ```
+
+> 🙏🏻Kinh nghiệm: Đừng tự ý sửa trực tiếp trên database, nếu bạn sửa trực tiếp trên database thì phải thêm câu lệnh vào migration file để đồng bộ với database
