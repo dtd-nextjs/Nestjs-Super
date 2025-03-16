@@ -9,9 +9,10 @@ import { ZodSerializerInterceptor } from 'nestjs-zod'
 import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter'
 import { LanguageModule } from 'src/routes/language/language.module'
 import { PermissionModule } from 'src/routes/permission/permission.module'
+import { RoleModule } from 'src/routes/role/role.module'
 
 @Module({
-  imports: [SharedModule, AuthModule, LanguageModule, PermissionModule],
+  imports: [SharedModule, AuthModule, LanguageModule, PermissionModule, RoleModule],
   controllers: [AppController],
   providers: [
     AppService,
