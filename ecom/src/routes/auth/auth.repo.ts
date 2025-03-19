@@ -8,6 +8,7 @@ import {
 } from 'src/routes/auth/auth.model'
 import { TypeOfVerificationCodeType } from 'src/shared/constants/auth.constant'
 import { UserType } from 'src/shared/models/shared-user.model'
+import { WhereUniqueUserType } from 'src/shared/repositories/shared-user.repo'
 import { PrismaService } from 'src/shared/services/prisma.service'
 
 @Injectable()
@@ -86,22 +87,20 @@ export class AuthRepository {
     })
   }
 
-  async findUniqueUserIncludeRole(
-    uniqueObject: { email: string } | { id: number },
-  ): Promise<(UserType & { role: RoleType }) | null> {
+  async findUniqueUserIncludeRole(where: WhereUniqueUserType): Promise<(UserType & { role: RoleType }) | null> {
     return this.prismaService.user.findUnique({
-      where: uniqueObject,
+      where,
       include: {
         role: true,
       },
     })
   }
 
-  async findUniqueRefreshTokenIncludeUserRole(uniqueObject: {
+  async findUniqueRefreshTokenIncludeUserRole(where: {
     token: string
   }): Promise<(RefreshTokenType & { user: UserType & { role: RoleType } }) | null> {
     return this.prismaService.refreshToken.findUnique({
-      where: uniqueObject,
+      where,
       include: {
         user: {
           include: {
@@ -121,16 +120,9 @@ export class AuthRepository {
     })
   }
 
-  deleteRefreshToken(uniqueObject: { token: string }): Promise<RefreshTokenType> {
+  deleteRefreshToken(where: { token: string }): Promise<RefreshTokenType> {
     return this.prismaService.refreshToken.delete({
-      where: uniqueObject,
-    })
-  }
-
-  updateUser(where: { id: number } | { email: string }, data: Partial<Omit<UserType, 'id'>>): Promise<UserType> {
-    return this.prismaService.user.update({
       where,
-      data,
     })
   }
 
