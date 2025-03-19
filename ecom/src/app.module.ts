@@ -10,9 +10,10 @@ import { HttpExceptionFilter } from 'src/shared/filters/http-exception.filter'
 import { LanguageModule } from 'src/routes/language/language.module'
 import { PermissionModule } from 'src/routes/permission/permission.module'
 import { RoleModule } from 'src/routes/role/role.module'
+import { ProfileModule } from 'src/routes/profile/profile.module'
 
 @Module({
-  imports: [SharedModule, AuthModule, LanguageModule, PermissionModule, RoleModule],
+  imports: [SharedModule, AuthModule, LanguageModule, PermissionModule, RoleModule, ProfileModule],
   controllers: [AppController],
   providers: [
     AppService,
