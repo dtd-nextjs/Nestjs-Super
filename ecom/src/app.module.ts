@@ -12,9 +12,19 @@ import { PermissionModule } from 'src/routes/permission/permission.module'
 import { RoleModule } from 'src/routes/role/role.module'
 import { ProfileModule } from 'src/routes/profile/profile.module'
 import { UserModule } from 'src/routes/user/user.module'
+import { MediaModule } from 'src/routes/media/media.module'
 
 @Module({
-  imports: [SharedModule, AuthModule, LanguageModule, PermissionModule, RoleModule, ProfileModule, UserModule],
+  imports: [
+    SharedModule,
+    AuthModule,
+    LanguageModule,
+    PermissionModule,
+    RoleModule,
+    ProfileModule,
+    UserModule,
+    MediaModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
