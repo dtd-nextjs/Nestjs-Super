@@ -1,11 +1,11 @@
 import {
+  Body,
   Controller,
   FileTypeValidator,
   Get,
   MaxFileSizeValidator,
   NotFoundException,
   Param,
-  ParseFilePipe,
   Post,
   Res,
   UploadedFiles,
@@ -16,10 +16,8 @@ import { Response } from 'express'
 import path from 'path'
 import { MediaService } from 'src/routes/media/media.service'
 import { ParseFilePipeWithUnlink } from 'src/routes/media/parse-file-pipe-with-unlink.pipe'
-import envConfig from 'src/shared/config'
 import { UPLOAD_DIR } from 'src/shared/constants/other.constant'
 import { IsPublic } from 'src/shared/decorators/auth.decorator'
-import { S3Service } from 'src/shared/services/s3.service'
 
 @Controller('media')
 export class MediaController {
@@ -58,5 +56,11 @@ export class MediaController {
         res.status(notfound.getStatus()).json(notfound.getResponse())
       }
     })
+  }
+
+  @Post('images/upload/presigned-url')
+  @IsPublic()
+  async createPresignedUrl(@Body() body: { filename: string }) {
+    return this.mediaService.getPresignUrl(body)
   }
 }
