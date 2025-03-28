@@ -27,6 +27,9 @@ export default function Layout() {
             <li>
               <a href='/login'>Đăng nhập</a>
             </li>
+            <li>
+              <a href='/upload'>Upload</a>
+            </li>
             {isLogged && (
               <li>
                 <button onClick={handleLogout}>Đăng xuất</button>
