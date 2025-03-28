@@ -8,10 +8,16 @@ export default function UploadPage() {
   const [isSuccess, setIsSuccess] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const handleUpload = () => {
+    console.log(file)
     if (file) {
+      // if (file.size > 1 * 1024 * 1024) {
+      //   alert('File size must be less than 1MB')
+      //   return
+      // }
       http
         .post('/media/images/upload/presigned-url', {
-          filename: file.name
+          filename: file.name,
+          filesize: file.size
         })
         .then((res) => {
           setUrl(res.data.url)
