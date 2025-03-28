@@ -10,6 +10,7 @@ export class S3Service {
   private s3: S3
   constructor() {
     this.s3 = new S3({
+      endpoint: envConfig.S3_ENPOINT,
       region: envConfig.S3_REGION,
       credentials: {
         secretAccessKey: envConfig.S3_SECRET_KEY,
