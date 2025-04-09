@@ -92,7 +92,7 @@ export class AuthService {
           email_code_type: {
             email: body.email,
             code: body.code,
-            type: TypeOfVerificationCode.FORGOT_PASSWORD,
+            type: TypeOfVerificationCode.REGISTER,
           },
         }),
       ])
