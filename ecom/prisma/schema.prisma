@@ -268,6 +268,7 @@ model ProductTranslation {
   updatedAt DateTime  @updatedAt
 
   @@index([deletedAt])
+  @@index([productId])
 }
 
 model Category {
