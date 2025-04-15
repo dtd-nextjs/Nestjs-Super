@@ -1,8 +1,10 @@
 import { ProductTranslationSchema } from 'src/routes/product/product-translation/product-translation.model'
-import { SKUSchema, UpsertSKUBodySchema } from 'src/routes/product/sku.model'
+import { UpsertSKUBodySchema } from 'src/routes/product/sku.model'
 import { OrderBy, SortBy } from 'src/shared/constants/other.constant'
 import { BrandIncludeTranslationSchema } from 'src/shared/models/shared-brand.model'
 import { CategoryIncludeTranslationSchema } from 'src/shared/models/shared-category.model'
+import { ProductSchema, VariantsType } from 'src/shared/models/shared-product.model'
+import { SKUSchema } from 'src/shared/models/shared-sku.model'
 import { z } from 'zod'
 
 function generateSKUs(variants: VariantsType) {
@@ -25,54 +27,6 @@ function generateSKUs(variants: VariantsType) {
     image: '',
   }))
 }
-export const VariantSchema = z.object({
-  value: z.string().trim(),
-  options: z.array(z.string().trim()),
-})
-
-export const VariantsSchema = z.array(VariantSchema).superRefine((variants, ctx) => {
-  // Kiểm tra variants và variant option có bị trùng hay không
-  for (let i = 0; i < variants.length; i++) {
-    const variant = variants[i]
-    const isExistingVariant = variants.findIndex((v) => v.value.toLowerCase() === variant.value.toLowerCase()) !== i
-    if (isExistingVariant) {
-      return ctx.addIssue({
-        code: 'custom',
-        message: `Giá trị ${variant.value} đã tồn tại trong danh sách variants. Vui lòng kiểm tra lại.`,
-        path: ['variants'],
-      })
-    }
-    const isDifferentOption = variant.options.some((option, index) => {
-      const isExistingOption = variant.options.findIndex((o) => o.toLowerCase() === option.toLowerCase()) !== index
-      return isExistingOption
-    })
-    if (isDifferentOption) {
-      return ctx.addIssue({
-        code: 'custom',
-        message: `Variant ${variant.value} chứa các option trùng tên với nhau. Vui lòng kiểm tra lại.`,
-        path: ['variants'],
-      })
-    }
-  }
-})
-
-export const ProductSchema = z.object({
-  id: z.number(),
-  publishedAt: z.coerce.date().nullable(),
-  name: z.string().trim().max(500),
-  basePrice: z.number().min(0),
-  virtualPrice: z.number().min(0),
-  brandId: z.number().positive(),
-  images: z.array(z.string()),
-  variants: VariantsSchema, // Json field represented as a record
-
-  createdById: z.number().nullable(),
-  updatedById: z.number().nullable(),
-  deletedById: z.number().nullable(),
-  deletedAt: z.date().nullable(),
-  createdAt: z.date(),
-  updatedAt: z.date(),
-})
 
 /**
  * Dành cho client và guest
@@ -182,8 +136,6 @@ export const CreateProductBodySchema = ProductSchema.pick({
 
 export const UpdateProductBodySchema = CreateProductBodySchema
 
-export type ProductType = z.infer<typeof ProductSchema>
-export type VariantsType = z.infer<typeof VariantsSchema>
 export type GetProductsResType = z.infer<typeof GetProductsResSchema>
 export type GetProductsQueryType = z.infer<typeof GetProductsQuerySchema>
 export type GetManageProductsQueryType = z.infer<typeof GetManageProductsQuerySchema>
