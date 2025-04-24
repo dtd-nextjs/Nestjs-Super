@@ -22,7 +22,8 @@ import { CategoryTranslationModule } from 'src/routes/category/category-translat
 import { ProductModule } from 'src/routes/product/product.module'
 import { ProductTranslationModule } from 'src/routes/product/product-translation/product-translation.module'
 import { CartModule } from 'src/routes/cart/cart.module'
-import { OrderModule } from 'src/routes/order/cart.module'
+import { OrderModule } from 'src/routes/order/order.module'
+import { PaymentModule } from 'src/routes/payment/payment.module'
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { OrderModule } from 'src/routes/order/cart.module'
     ProductTranslationModule,
     CartModule,
     OrderModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [
