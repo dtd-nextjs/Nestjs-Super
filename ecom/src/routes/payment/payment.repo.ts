@@ -21,7 +21,11 @@ export class PaymentRepo {
     }, 0)
   }
 
-  async receiver(body: WebhookPaymentBodyType): Promise<MessageResType> {
+  async receiver(body: WebhookPaymentBodyType): Promise<
+    MessageResType & {
+      paymentId: number
+    }
+  > {
     // 1. Thêm thông tin giao dịch vào DB
     // Tham khảo: https://docs.sepay.vn/lap-trinh-webhooks.html
     let amountIn = 0
@@ -99,6 +103,7 @@ export class PaymentRepo {
     ])
 
     return {
+      paymentId,
       message: 'Payment success',
     }
   }
