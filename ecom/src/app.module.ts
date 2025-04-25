@@ -25,6 +25,7 @@ import { CartModule } from 'src/routes/cart/cart.module'
 import { OrderModule } from 'src/routes/order/order.module'
 import { PaymentModule } from 'src/routes/payment/payment.module'
 import { BullModule } from '@nestjs/bullmq'
+import { PaymentConsumer } from 'src/queues/payment.consumer'
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { BullModule } from '@nestjs/bullmq'
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
     },
+    PaymentConsumer,
   ],
 })
 export class AppModule {}
