@@ -27,6 +27,7 @@ import { PaymentModule } from 'src/routes/payment/payment.module'
 import { BullModule } from '@nestjs/bullmq'
 import { PaymentConsumer } from 'src/queues/payment.consumer'
 import envConfig from 'src/shared/config'
+import { WebsocketModule } from 'src/websockets/websocket.module'
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import envConfig from 'src/shared/config'
       resolvers: [{ use: QueryResolver, options: ['lang'] }, AcceptLanguageResolver],
       typesOutputPath: path.resolve('src/generated/i18n.generated.ts'),
     }),
+    WebsocketModule,
     SharedModule,
     AuthModule,
     LanguageModule,
